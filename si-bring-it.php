@@ -1,14 +1,14 @@
 <?php
 /**
  * @package si-bring-it
- * @version 1.0.1
+ * @version 1.1.1
  */
 /*
 Plugin Name: SI Bring It
 Plugin URI: https://github.com/bradatsperlinginteractive/si-bring-it
 Description: This is not just a plugin, it symbolizes the hope and enthusiasm of a single person.
 Author: Bradford Knowlton
-Version: 1.0.1
+Version: 1.1.1
 Author URI: http://bradknowlton.com/
 */
 
@@ -99,3 +99,30 @@ function bring_it_func( $atts ) {
 add_shortcode( 'bring_it', 'bring_it_func' );
 
 
+
+
+add_action('init', 'si_bring_it_add_rewrite_rule', 11);
+
+function si_bring_it_add_rewrite_rule() {
+    add_rewrite_rule(
+        '^api/ring.php$',
+        'index.php?action=ring',
+        'top'
+    );
+}
+
+add_action( 'parse_query', 'si_bring_it_url_redirect' );
+function si_bring_it_url_redirect( $wp_query ) {
+	if( isset( $wp_query->query_vars['action'] ) && 'ring' == $wp_query->query_vars['action'] ){
+        // output file here
+        header('Content-Type: application/json');
+        echo json_encode( array( 'id'=>1, 'hits'=> bring_it_ring() ) );
+        die();
+    }
+}
+
+function themeslug_query_vars( $qvars ) {
+  $qvars[] = 'action';
+  return $qvars;
+}
+add_filter( 'query_vars', 'themeslug_query_vars' );
